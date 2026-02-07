@@ -87,6 +87,20 @@ body {
   }
 }
 
+/* Slow Spin Animation for CTA icons */
+.animate-spin-slow {
+  animation: spinSlow 3s linear infinite;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Custom Scrollbar */
 .dark-scrollbar::-webkit-scrollbar {
   width: 8px;

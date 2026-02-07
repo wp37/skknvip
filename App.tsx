@@ -505,6 +505,35 @@ Hãy phân tích:
               <span className="hidden sm:inline">Nhập API Key</span>
             </button>
 
+            {/* Premium Registration CTA Button - Show when user not activated */}
+            {!isUserActivated() && !adminLoggedIn && (
+              <button
+                onClick={() => {
+                  setShowRegisterModal(true);
+                  setRegisterSuccess(false);
+                  setRegisterError('');
+                  setFullNameInput('');
+                  setPhoneInput('');
+                }}
+                className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-400 hover:via-orange-400 hover:to-red-400 rounded-xl text-white font-bold text-sm transition-all duration-300 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 animate-pulse hover:animate-none"
+              >
+                <Sparkles size={16} className="animate-spin-slow" />
+                <span className="hidden sm:inline">Đăng ký sử dụng</span>
+                <span className="sm:hidden">Đăng ký</span>
+                <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-white text-red-500 text-[10px] font-bold rounded-full shadow-md">
+                  100K
+                </span>
+              </button>
+            )}
+
+            {/* User Status Badge - Show when activated */}
+            {isUserActivated() && !adminLoggedIn && (
+              <span className="flex items-center gap-1.5 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
+                <Check size={14} />
+                <span className="hidden sm:inline">Đã kích hoạt</span>
+              </span>
+            )}
+
             <span className="px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded">
               {APP_VERSION}
             </span>
