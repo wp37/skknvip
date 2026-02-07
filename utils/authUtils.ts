@@ -1,6 +1,44 @@
 // Authentication Utilities for SKKN Architect Pro
 // Manages admin login and phone-based feature activation
 
+// Safe localStorage helpers (avoid SSR crashes)
+const getStorage = (): Storage | null => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage;
+  }
+  return null;
+};
+
+const safeGetItem = (key: string): string | null => {
+  const storage = getStorage();
+  if (!storage) return null;
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.setItem(key, value);
+  } catch {
+    // Ignore storage errors (quota exceeded, etc.)
+  }
+};
+
+const safeRemoveItem = (key: string): void => {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.removeItem(key);
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 // Bank Info for Payment
 export const BANK_INFO = {
   bankName: 'Agribank',
@@ -43,43 +81,43 @@ export const validateAdminCredentials = (username: string, password: string): bo
  * Check if admin is currently logged in
  */
 export const isAdmin = (): boolean => {
-  return localStorage.getItem(STORAGE_KEYS.ADMIN_LOGGED_IN) === 'true';
+  return safeGetItem(STORAGE_KEYS.ADMIN_LOGGED_IN) === 'true';
 };
 
 /**
  * Log in as admin
  */
 export const loginAdmin = (): void => {
-  localStorage.setItem(STORAGE_KEYS.ADMIN_LOGGED_IN, 'true');
+  safeSetItem(STORAGE_KEYS.ADMIN_LOGGED_IN, 'true');
 };
 
 /**
  * Log out admin
  */
 export const logoutAdmin = (): void => {
-  localStorage.removeItem(STORAGE_KEYS.ADMIN_LOGGED_IN);
+  safeRemoveItem(STORAGE_KEYS.ADMIN_LOGGED_IN);
 };
 
 /**
  * Get current user's phone number
  */
 export const getCurrentUserPhone = (): string | null => {
-  return localStorage.getItem(STORAGE_KEYS.USER_PHONE);
+  return safeGetItem(STORAGE_KEYS.USER_PHONE);
 };
 
 /**
  * Get current user's full name
  */
 export const getCurrentUserName = (): string | null => {
-  return localStorage.getItem(STORAGE_KEYS.USER_FULL_NAME);
+  return safeGetItem(STORAGE_KEYS.USER_FULL_NAME);
 };
 
 /**
  * Set current user's info
  */
 export const setCurrentUser = (phone: string, fullName: string): void => {
-  localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
-  localStorage.setItem(STORAGE_KEYS.USER_FULL_NAME, fullName);
+  safeSetItem(STORAGE_KEYS.USER_PHONE, phone);
+  safeSetItem(STORAGE_KEYS.USER_FULL_NAME, fullName);
 };
 
 /**
@@ -87,7 +125,7 @@ export const setCurrentUser = (phone: string, fullName: string): void => {
  */
 export const getPendingRegistrations = (): UserRegistration[] => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_REGISTRATIONS) || '[]');
+    return JSON.parse(safeGetItem(STORAGE_KEYS.PENDING_REGISTRATIONS) || '[]');
   } catch {
     return [];
   }
@@ -98,7 +136,7 @@ export const getPendingRegistrations = (): UserRegistration[] => {
  */
 export const getActivatedRegistrations = (): UserRegistration[] => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS) || '[]');
+    return JSON.parse(safeGetItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS) || '[]');
   } catch {
     return [];
   }
@@ -166,7 +204,7 @@ export const registerUser = (phone: string, fullName: string): { success: boolea
 
   // Add to pending list
   pendingRegs.push(newReg);
-  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
+  safeSetItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
 
   // Set as current user
   setCurrentUser(phone, fullName.trim());
@@ -185,13 +223,13 @@ export const activateUser = (phone: string): void => {
 
   // Remove from pending
   const newPendingRegs = pendingRegs.filter(reg => reg.phone !== phone);
-  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(newPendingRegs));
+  safeSetItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(newPendingRegs));
 
   // Add to activated
   const activatedRegs = getActivatedRegistrations();
   if (!activatedRegs.some(reg => reg.phone === phone)) {
     activatedRegs.push(regToActivate);
-    localStorage.setItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
+    safeSetItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
   }
 };
 
@@ -200,7 +238,7 @@ export const activateUser = (phone: string): void => {
  */
 export const rejectUser = (phone: string): void => {
   const pendingRegs = getPendingRegistrations().filter(reg => reg.phone !== phone);
-  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
+  safeSetItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
 };
 
 /**
@@ -208,7 +246,7 @@ export const rejectUser = (phone: string): void => {
  */
 export const deactivateUser = (phone: string): void => {
   const activatedRegs = getActivatedRegistrations().filter(reg => reg.phone !== phone);
-  localStorage.setItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
+  safeSetItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
 };
 
 /**
@@ -247,5 +285,5 @@ export const registerPhone = (phone: string): { success: boolean; error?: string
 };
 
 export const setCurrentUserPhone = (phone: string): void => {
-  localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
+  safeSetItem(STORAGE_KEYS.USER_PHONE, phone);
 };
