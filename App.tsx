@@ -762,7 +762,7 @@ Hãy phân tích:
 
                 <div className="flex flex-col gap-3">
                   <button
-                    onClick={handleRegisterPhone}
+                    onClick={handleRegisterUser}
                     disabled={!phoneInput.trim()}
                     className="w-full py-3 bg-green-500 hover:bg-green-600 rounded-xl text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
@@ -862,11 +862,11 @@ Hãy phân tích:
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-sm">
                     <History size={14} />
-                    {pendingPhones.length} chờ duyệt
+                    {pendingRegistrations.length} chờ duyệt
                   </span>
                   <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
                     <Users size={14} />
-                    {activatedPhones.length} đã kích hoạt
+                    {activatedRegistrations.length} đã kích hoạt
                   </span>
                   <button onClick={() => setShowAdminPanel(false)} className="ml-2 text-gray-400 hover:text-white p-1">
                     <X size={24} />
