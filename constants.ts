@@ -6,52 +6,52 @@ export const SYSTEM_API_KEY = '';
 
 // Available AI Models
 export const SKKN_MODELS = [
-    { id: 'gemini-2.5-flash-preview-09-2025', name: '⚡ Gemini 2.5 Flash (Khuyên dùng)' },
-    { id: 'gemini-2.0-flash-exp', name: '🚀 Gemini 2.0 Flash Exp' },
-    { id: 'gemini-1.5-pro', name: '💎 Gemini 1.5 Pro (Chất lượng cao)' },
-    { id: 'gemini-1.5-flash', name: '⚡ Gemini 1.5 Flash (Nhanh)' },
-    { id: 'gemini-1.5-flash-latest', name: '⚡ Gemini 1.5 Flash Latest' },
-    { id: 'custom', name: '🔧 Nhập Model Tùy Chỉnh...' },
+   { id: 'gemini-2.5-flash-preview-09-2025', name: '⚡ Gemini 2.5 Flash (Khuyên dùng)' },
+   { id: 'gemini-2.0-flash-exp', name: '🚀 Gemini 2.0 Flash Exp' },
+   { id: 'gemini-1.5-pro', name: '💎 Gemini 1.5 Pro (Chất lượng cao)' },
+   { id: 'gemini-1.5-flash', name: '⚡ Gemini 1.5 Flash (Nhanh)' },
+   { id: 'gemini-1.5-flash-latest', name: '⚡ Gemini 1.5 Flash Latest' },
+   { id: 'custom', name: '🔧 Nhập Model Tùy Chỉnh...' },
 ];
 
 // Subject List
 export const SUBJECT_LIST = [
-    'Ngữ văn',
-    'Toán học',
-    'Tiếng Anh',
-    'Vật lý',
-    'Hóa học',
-    'Sinh học',
-    'Lịch sử',
-    'Địa lý',
-    'Giáo dục công dân',
-    'Tin học',
-    'Công nghệ',
-    'Thể dục',
-    'Âm nhạc',
-    'Mỹ thuật',
-    'Công tác Chủ nhiệm lớp',
-    'Quản lý giáo dục',
-    'Khác',
+   'Ngữ văn',
+   'Toán học',
+   'Tiếng Anh',
+   'Vật lý',
+   'Hóa học',
+   'Sinh học',
+   'Lịch sử',
+   'Địa lý',
+   'Giáo dục công dân',
+   'Tin học',
+   'Công nghệ',
+   'Thể dục',
+   'Âm nhạc',
+   'Mỹ thuật',
+   'Công tác Chủ nhiệm lớp',
+   'Quản lý giáo dục',
+   'Khác',
 ];
 
 // Book Sets
 export const BOOK_SETS = [
-    'Kết nối tri thức với cuộc sống',
-    'Chân trời sáng tạo',
-    'Cánh Diều',
-    'Sách giáo khoa cũ (trước 2018)',
-    'Tài liệu tự biên soạn',
-    'Không áp dụng',
+   'Kết nối tri thức với cuộc sống',
+   'Chân trời sáng tạo',
+   'Cánh Diều',
+   'Sách giáo khoa cũ (trước 2018)',
+   'Tài liệu tự biên soạn',
+   'Không áp dụng',
 ];
 
 // Quick Suggestions
 export const SKKN_SUGGESTIONS = [
-    'Ứng dụng AI ChatGPT trong dạy học',
-    'Sử dụng Kahoot tạo hứng thú học tập',
-    'Phát triển năng lực tự học cho học sinh',
-    'Thiết kế bài giảng E-learning tương tác',
-    'Giáo dục STEM trong nhà trường',
+   'Ứng dụng AI ChatGPT trong dạy học',
+   'Sử dụng Kahoot tạo hứng thú học tập',
+   'Phát triển năng lực tự học cho học sinh',
+   'Thiết kế bài giảng E-learning tương tác',
+   'Giáo dục STEM trong nhà trường',
 ];
 
 // System Instruction for SKKN Generator - Enhanced for detailed, academic content
@@ -109,19 +109,19 @@ Chấm điểm theo thang điểm 100 với biên độ chi tiết (không chấ
 `;
 
 // Outline Prompt - Enhanced for detailed structure
-export const OUTLINE_PROMPT = (formData: FormData): string => \`
+export const OUTLINE_PROMPT = (formData: FormData): string => `
 Hãy lập DÀN Ý SIÊU CHI TIẾT cho một Sáng kiến Kinh nghiệm cấp Tỉnh với thông tin sau:
 
-📌 TÊN ĐỀ TÀI: \${formData.title}
-📚 MÔN HỌC: \${formData.subject}
-📖 BỘ SÁCH: \${formData.bookSet}
-🎓 KHỐI LỚP: \${formData.grade || 'Không xác định'}
+📌 TÊN ĐỀ TÀI: ${formData.title}
+📚 MÔN HỌC: ${formData.subject}
+📖 BỘ SÁCH: ${formData.bookSet}
+🎓 KHỐI LỚP: ${formData.grade || 'Không xác định'}
 
 📋 THỰC TRẠNG/VẤN ĐỀ: 
-\${formData.situation || 'Chưa có thông tin cụ thể'}
+${formData.situation || 'Chưa có thông tin cụ thể'}
 
 💡 GIẢI PHÁP ĐỀ XUẤT:
-\${formData.solution || 'Chưa có thông tin cụ thể'}
+${formData.solution || 'Chưa có thông tin cụ thể'}
 
 🎯 YÊU CẦU DÀN Ý:
 Tạo dàn ý theo cấu trúc chuẩn SKKN với các phần SIÊU CHI TIẾT như sau:
@@ -185,14 +185,14 @@ Tạo dàn ý theo cấu trúc chuẩn SKKN với các phần SIÊU CHI TIẾT n
 - Sách, giáo trình
 - Bài báo, tạp chí khoa học
 - Tài liệu điện tử uy tín
-\`;
+`;
 
 // Part 1 Prompt - Enhanced for deep academic content
-export const PART_1_PROMPT = (outline: string): string => \`
+export const PART_1_PROMPT = (outline: string): string => `
 Dựa trên dàn ý sau, hãy viết SIÊU CHI TIẾT **PHẦN I (Lý do chọn đề tài) và PHẦN II (Thực trạng vấn đề)**:
 
 DÀN Ý:
-\${outline}
+${outline}
 
 📏 YÊU CẦU ĐỘ DÀI: TỐI THIỂU 2500-3000 từ cho 2 phần này
 
@@ -249,20 +249,20 @@ DÀN Ý:
 - Sử dụng "tác giả", "chúng tôi" thay vì "tôi"
 - Có tiểu kết cuối mỗi phần
 - Câu văn rõ ràng, mạch lạc, có liên kết
-\`;
+`;
 
 // Part 2-3 Prompt - Enhanced for comprehensive solutions and results
-export const PART_2_3_PROMPT = (outline: string, part1: string, specificLessons: string): string => \`
+export const PART_2_3_PROMPT = (outline: string, part1: string, specificLessons: string): string => `
 Tiếp tục viết SIÊU CHI TIẾT **PHẦN III (Giải pháp), PHẦN IV (Hiệu quả) và PHẦN V (Kết luận)** dựa trên:
 
 DÀN Ý:
-\${outline}
+${outline}
 
 NỘI DUNG ĐÃ VIẾT (PHẦN I, II):
-\${part1}
+${part1}
 
 TÀI LIỆU THAM KHẢO/BÀI GIẢNG CỤ THỂ:
-\${specificLessons || 'Không có tài liệu đính kèm'}
+${specificLessons || 'Không có tài liệu đính kèm'}
 
 📏 YÊU CẦU ĐỘ DÀI: TỐI THIỂU 3500-4000 từ cho 3 phần này
 
@@ -345,10 +345,10 @@ Liệt kê tối thiểu 10 nguồn tham khảo:
 - Sách, giáo trình (tác giả, năm xuất bản, NXB)
 - Bài báo khoa học (tên bài, tạp chí, năm)
 - Tài liệu điện tử (đường link, ngày truy cập)
-\`;
+`;
 
 // Evaluation Prompt - Enhanced
-export const EVALUATION_PROMPT = \`
+export const EVALUATION_PROMPT = `
 Hãy đánh giá SKKN này CHUYÊN SÂU theo các tiêu chí sau và cho điểm (thang 100):
 
 📊 TIÊU CHÍ CHẤM ĐIỂM CHI TIẾT:
@@ -409,10 +409,10 @@ Hãy đánh giá SKKN này CHUYÊN SÂU theo các tiêu chí sau và cho điểm
 6. **KẾT LUẬN VÀ KHUYẾN NGHỊ**:
    - SKKN này có đủ điều kiện đạt giải cấp nào?
    - Cần bổ sung gì để nâng cấp?
-\`;
+`;
 
 // Plagiarism Check Prompt - Enhanced
-export const PLAGIARISM_CHECK_PROMPT = \`
+export const PLAGIARISM_CHECK_PROMPT = `
 Hãy kiểm tra CHUYÊN SÂU nội dung SKKN này về tính độc đáo và phát hiện các dấu hiệu đạo văn/sao chép:
 
 🔍 KIỂM TRA CHI TIẾT:
@@ -464,5 +464,4 @@ Hãy kiểm tra CHUYÊN SÂU nội dung SKKN này về tính độc đáo và ph
 5. **KẾT LUẬN**:
    - SKKN có đủ tiêu chuẩn về tính độc đáo không?
    - Cần sửa đổi những gì trước khi nộp?
-\`;
-
+`;
