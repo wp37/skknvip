@@ -1,11 +1,29 @@
 // Authentication Utilities for SKKN Architect Pro
 // Manages admin login and phone-based feature activation
 
+// Bank Info for Payment
+export const BANK_INFO = {
+  bankName: 'Agribank',
+  accountNumber: '7110215003073',
+  accountHolder: 'VO NGOC TUNG',
+  amount: '100.000đ',
+  // VietQR URL for QR code display
+  qrUrl: 'https://img.vietqr.io/image/agribank-7110215003073-compact2.png?amount=100000&addInfo=SKKN&accountName=VO%20NGOC%20TUNG',
+};
+
+// User Registration interface
+export interface UserRegistration {
+  phone: string;
+  fullName: string;
+  registeredAt: string;
+}
+
 const STORAGE_KEYS = {
   ADMIN_LOGGED_IN: 'skkn_admin_logged_in',
   USER_PHONE: 'skkn_user_phone',
-  PENDING_PHONES: 'skkn_pending_phones',
-  ACTIVATED_PHONES: 'skkn_activated_phones',
+  USER_FULL_NAME: 'skkn_user_full_name',
+  PENDING_REGISTRATIONS: 'skkn_pending_registrations',
+  ACTIVATED_REGISTRATIONS: 'skkn_activated_registrations',
 };
 
 // Admin credentials (hardcoded for simplicity)
@@ -50,29 +68,37 @@ export const getCurrentUserPhone = (): string | null => {
 };
 
 /**
- * Set current user's phone number
+ * Get current user's full name
  */
-export const setCurrentUserPhone = (phone: string): void => {
-  localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
+export const getCurrentUserName = (): string | null => {
+  return localStorage.getItem(STORAGE_KEYS.USER_FULL_NAME);
 };
 
 /**
- * Get list of pending phone registrations
+ * Set current user's info
  */
-export const getPendingPhones = (): string[] => {
+export const setCurrentUser = (phone: string, fullName: string): void => {
+  localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
+  localStorage.setItem(STORAGE_KEYS.USER_FULL_NAME, fullName);
+};
+
+/**
+ * Get list of pending registrations
+ */
+export const getPendingRegistrations = (): UserRegistration[] => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_PHONES) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_REGISTRATIONS) || '[]');
   } catch {
     return [];
   }
 };
 
 /**
- * Get list of activated phone numbers
+ * Get list of activated registrations
  */
-export const getActivatedPhones = (): string[] => {
+export const getActivatedRegistrations = (): UserRegistration[] => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVATED_PHONES) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS) || '[]');
   } catch {
     return [];
   }
@@ -85,84 +111,141 @@ export const isUserActivated = (): boolean => {
   const userPhone = getCurrentUserPhone();
   if (!userPhone) return false;
 
-  const activatedPhones = getActivatedPhones();
-  return activatedPhones.includes(userPhone);
+  const activatedRegs = getActivatedRegistrations();
+  return activatedRegs.some(reg => reg.phone === userPhone);
 };
 
 /**
- * Check if user can access premium features
- * Returns true if admin OR user phone is activated
+ * Check if user can access basic features (always true - free access)
  */
 export const canAccessFeature = (): boolean => {
+  return true;
+};
+
+/**
+ * Check if user can access premium/advanced features
+ * Premium features require registration and admin approval
+ */
+export const canAccessPremiumFeature = (): boolean => {
   return isAdmin() || isUserActivated();
 };
 
 /**
- * Register a phone number for activation (add to pending list)
+ * Register a user with phone and full name
  */
-export const registerPhone = (phone: string): { success: boolean; error?: string } => {
+export const registerUser = (phone: string, fullName: string): { success: boolean; error?: string } => {
   // Validate phone format (Vietnamese: 10-11 digits starting with 0)
   const phoneRegex = /^0\d{9,10}$/;
   if (!phoneRegex.test(phone)) {
     return { success: false, error: 'Số điện thoại không hợp lệ (10-11 số, bắt đầu bằng 0)' };
   }
 
-  // Check for duplicates
-  const pendingPhones = getPendingPhones();
-  const activatedPhones = getActivatedPhones();
+  // Validate full name
+  if (!fullName || fullName.trim().length < 2) {
+    return { success: false, error: 'Vui lòng nhập họ và tên đầy đủ' };
+  }
 
-  if (pendingPhones.includes(phone)) {
+  // Check for duplicates
+  const pendingRegs = getPendingRegistrations();
+  const activatedRegs = getActivatedRegistrations();
+
+  if (pendingRegs.some(reg => reg.phone === phone)) {
     return { success: false, error: 'Số điện thoại này đang chờ duyệt' };
   }
 
-  if (activatedPhones.includes(phone)) {
+  if (activatedRegs.some(reg => reg.phone === phone)) {
     return { success: false, error: 'Số điện thoại này đã được kích hoạt' };
   }
 
-  // Add to pending list
-  pendingPhones.push(phone);
-  localStorage.setItem(STORAGE_KEYS.PENDING_PHONES, JSON.stringify(pendingPhones));
+  // Create registration
+  const newReg: UserRegistration = {
+    phone,
+    fullName: fullName.trim(),
+    registeredAt: new Date().toISOString(),
+  };
 
-  // Set as current user phone
-  setCurrentUserPhone(phone);
+  // Add to pending list
+  pendingRegs.push(newReg);
+  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
+
+  // Set as current user
+  setCurrentUser(phone, fullName.trim());
 
   return { success: true };
 };
 
 /**
- * Activate a phone number (move from pending to activated)
+ * Activate a user registration (move from pending to activated)
  */
-export const activatePhone = (phone: string): void => {
-  // Remove from pending
-  const pendingPhones = getPendingPhones().filter(p => p !== phone);
-  localStorage.setItem(STORAGE_KEYS.PENDING_PHONES, JSON.stringify(pendingPhones));
+export const activateUser = (phone: string): void => {
+  const pendingRegs = getPendingRegistrations();
+  const regToActivate = pendingRegs.find(reg => reg.phone === phone);
 
-  // Add to activated if not already there
-  const activatedPhones = getActivatedPhones();
-  if (!activatedPhones.includes(phone)) {
-    activatedPhones.push(phone);
-    localStorage.setItem(STORAGE_KEYS.ACTIVATED_PHONES, JSON.stringify(activatedPhones));
+  if (!regToActivate) return;
+
+  // Remove from pending
+  const newPendingRegs = pendingRegs.filter(reg => reg.phone !== phone);
+  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(newPendingRegs));
+
+  // Add to activated
+  const activatedRegs = getActivatedRegistrations();
+  if (!activatedRegs.some(reg => reg.phone === phone)) {
+    activatedRegs.push(regToActivate);
+    localStorage.setItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
   }
 };
 
 /**
- * Deactivate a phone number (remove from activated list)
+ * Reject/Remove a pending registration
  */
-export const deactivatePhone = (phone: string): void => {
-  const activatedPhones = getActivatedPhones().filter(p => p !== phone);
-  localStorage.setItem(STORAGE_KEYS.ACTIVATED_PHONES, JSON.stringify(activatedPhones));
+export const rejectUser = (phone: string): void => {
+  const pendingRegs = getPendingRegistrations().filter(reg => reg.phone !== phone);
+  localStorage.setItem(STORAGE_KEYS.PENDING_REGISTRATIONS, JSON.stringify(pendingRegs));
+};
+
+/**
+ * Deactivate a user (remove from activated list)
+ */
+export const deactivateUser = (phone: string): void => {
+  const activatedRegs = getActivatedRegistrations().filter(reg => reg.phone !== phone);
+  localStorage.setItem(STORAGE_KEYS.ACTIVATED_REGISTRATIONS, JSON.stringify(activatedRegs));
 };
 
 /**
  * Check if a phone number is in pending list
  */
 export const isPhonePending = (phone: string): boolean => {
-  return getPendingPhones().includes(phone);
+  return getPendingRegistrations().some(reg => reg.phone === phone);
 };
 
 /**
  * Check if a phone number is activated
  */
 export const isPhoneActivated = (phone: string): boolean => {
-  return getActivatedPhones().includes(phone);
+  return getActivatedRegistrations().some(reg => reg.phone === phone);
+};
+
+// Legacy exports for backward compatibility
+export const getPendingPhones = (): string[] => {
+  return getPendingRegistrations().map(reg => reg.phone);
+};
+
+export const getActivatedPhones = (): string[] => {
+  return getActivatedRegistrations().map(reg => reg.phone);
+};
+
+export const activatePhone = (phone: string): void => {
+  activateUser(phone);
+};
+
+export const deactivatePhone = (phone: string): void => {
+  deactivateUser(phone);
+};
+
+export const registerPhone = (phone: string): { success: boolean; error?: string } => {
+  return registerUser(phone, 'Unknown');
+};
+
+export const setCurrentUserPhone = (phone: string): void => {
+  localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
 };

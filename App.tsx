@@ -16,15 +16,18 @@ import {
   isAdmin,
   loginAdmin,
   logoutAdmin,
-  getPendingPhones,
-  getActivatedPhones,
-  activatePhone,
-  deactivatePhone,
-  registerPhone,
+  getPendingRegistrations,
+  getActivatedRegistrations,
+  activateUser,
+  deactivateUser,
+  registerUser,
   canAccessFeature,
   getCurrentUserPhone,
+  getCurrentUserName,
   isUserActivated,
-  isPhonePending
+  isPhonePending,
+  BANK_INFO,
+  UserRegistration
 } from './utils/authUtils';
 import { FormData, Settings as SettingsType, GenerationStep, UploadedFile, AppMode } from './types';
 import * as mammoth from 'mammoth';
@@ -91,12 +94,13 @@ const App: React.FC = () => {
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [pendingPhones, setPendingPhones] = useState<string[]>([]);
-  const [activatedPhones, setActivatedPhones] = useState<string[]>([]);
+  const [pendingRegistrations, setPendingRegistrations] = useState<UserRegistration[]>([]);
+  const [activatedRegistrations, setActivatedRegistrations] = useState<UserRegistration[]>([]);
 
   // User Registration states
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
+  const [fullNameInput, setFullNameInput] = useState('');
   const [registerError, setRegisterError] = useState('');
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [userActivated, setUserActivated] = useState(canAccessFeature());
@@ -112,8 +116,8 @@ const App: React.FC = () => {
   // Load phone lists when admin panel opens
   useEffect(() => {
     if (showAdminPanel && adminLoggedIn) {
-      setPendingPhones(getPendingPhones());
-      setActivatedPhones(getActivatedPhones());
+      setPendingRegistrations(getPendingRegistrations());
+      setActivatedRegistrations(getActivatedRegistrations());
     }
   }, [showAdminPanel, adminLoggedIn]);
 
@@ -144,26 +148,27 @@ const App: React.FC = () => {
     setShowAdminPanel(false);
   };
 
-  // Handle activate phone
-  const handleActivatePhone = (phone: string) => {
-    activatePhone(phone);
-    setPendingPhones(getPendingPhones());
-    setActivatedPhones(getActivatedPhones());
+  // Handle activate user
+  const handleActivateUser = (phone: string) => {
+    activateUser(phone);
+    setPendingRegistrations(getPendingRegistrations());
+    setActivatedRegistrations(getActivatedRegistrations());
   };
 
-  // Handle deactivate phone
-  const handleDeactivatePhone = (phone: string) => {
-    deactivatePhone(phone);
-    setActivatedPhones(getActivatedPhones());
+  // Handle deactivate user
+  const handleDeactivateUser = (phone: string) => {
+    deactivateUser(phone);
+    setActivatedRegistrations(getActivatedRegistrations());
   };
 
-  // Handle user phone registration
-  const handleRegisterPhone = () => {
-    const res = registerPhone(phoneInput);
+  // Handle user registration with full name
+  const handleRegisterUser = () => {
+    const res = registerUser(phoneInput, fullNameInput);
     if (res.success) {
       setRegisterSuccess(true);
       setRegisterError('');
       setPhoneInput('');
+      setFullNameInput('');
     } else {
       setRegisterError(res.error || 'Có lỗi xảy ra');
       setRegisterSuccess(false);
@@ -878,30 +883,33 @@ Hãy phân tích:
                     <History size={18} />
                     Yêu cầu chờ duyệt
                     <span className="ml-2 w-6 h-6 bg-amber-500 text-black text-xs font-bold rounded-full flex items-center justify-center">
-                      {pendingPhones.length}
+                      {pendingRegistrations.length}
                     </span>
                   </h4>
                 </div>
                 <div className="p-4">
-                  {pendingPhones.length === 0 ? (
+                  {pendingRegistrations.length === 0 ? (
                     <div className="text-center py-8">
                       <Users size={48} className="mx-auto mb-3 text-amber-500/30" />
                       <p className="text-gray-500">Không có yêu cầu nào đang chờ duyệt</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {pendingPhones.map((phone, index) => (
-                        <div key={phone} className="flex items-center justify-between p-3 bg-[#0d0d1a]/50 rounded-lg">
+                      {pendingRegistrations.map((reg, index) => (
+                        <div key={reg.phone} className="flex items-center justify-between p-3 bg-[#0d0d1a]/50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <span className="text-gray-500">{index + 1}.</span>
-                            <span className="text-white font-mono text-lg">{phone}</span>
+                            <div>
+                              <p className="text-white font-medium">{reg.fullName}</p>
+                              <p className="text-amber-400 font-mono text-sm">{reg.phone}</p>
+                            </div>
                           </div>
                           <button
-                            onClick={() => handleActivatePhone(phone)}
+                            onClick={() => handleActivateUser(reg.phone)}
                             className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 rounded-lg transition-colors"
                           >
                             <Check size={16} />
-                            Kích hoạt
+                            Duyệt
                           </button>
                         </div>
                       ))}
@@ -917,34 +925,37 @@ Hãy phân tích:
                     <Users size={18} />
                     Người dùng đã kích hoạt
                     <span className="ml-2 w-6 h-6 bg-green-500 text-black text-xs font-bold rounded-full flex items-center justify-center">
-                      {activatedPhones.length}
+                      {activatedRegistrations.length}
                     </span>
                   </h4>
                 </div>
                 <div className="p-4">
-                  {activatedPhones.length === 0 ? (
+                  {activatedRegistrations.length === 0 ? (
                     <div className="text-center py-8">
                       <Users size={48} className="mx-auto mb-3 text-green-500/30" />
                       <p className="text-gray-500">Chưa có người dùng nào được kích hoạt</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {activatedPhones.map((phone, index) => (
-                        <div key={phone} className="flex items-center justify-between p-3 bg-[#0d0d1a]/50 rounded-lg">
+                      {activatedRegistrations.map((reg, index) => (
+                        <div key={reg.phone} className="flex items-center justify-between p-3 bg-[#0d0d1a]/50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <span className="text-gray-500">{index + 1}.</span>
-                            <span className="text-white font-mono text-lg">{phone}</span>
+                            <div>
+                              <p className="text-white font-medium">{reg.fullName}</p>
+                              <p className="text-green-400 font-mono text-sm">{reg.phone}</p>
+                            </div>
                             <span className="px-2 py-0.5 bg-green-500/20 border border-green-500/30 text-green-400 text-xs rounded-full flex items-center gap-1">
                               <Check size={12} />
                               Đã kích hoạt
                             </span>
                           </div>
                           <button
-                            onClick={() => handleDeactivatePhone(phone)}
+                            onClick={() => handleDeactivateUser(reg.phone)}
                             className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg transition-colors"
                           >
                             <X size={16} />
-                            Hủy kích hoạt
+                            Hủy
                           </button>
                         </div>
                       ))}
@@ -966,22 +977,22 @@ Hãy phân tích:
 
       {/* User Registration Modal */}
       {showRegisterModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1a2e] rounded-2xl w-full max-w-md border border-gray-700">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-[#1a1a2e] rounded-2xl w-full max-w-lg border border-gray-700 my-4">
             {/* Header */}
-            <div className="p-6 border-b border-gray-700">
+            <div className="p-5 border-b border-gray-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                    <Phone size={24} className="text-amber-400" />
+                    <Lock size={24} className="text-amber-400" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Đăng ký sử dụng</h3>
-                    <p className="text-gray-500 text-sm">Nhập số điện thoại để kích hoạt tính năng</p>
+                    <p className="text-gray-500 text-sm">Chuyển khoản để kích hoạt</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => { setShowRegisterModal(false); setRegisterError(''); setRegisterSuccess(false); }}
+                  onClick={() => { setShowRegisterModal(false); setRegisterError(''); setRegisterSuccess(false); setFullNameInput(''); setPhoneInput(''); }}
                   className="text-gray-400 hover:text-white p-1"
                 >
                   <X size={24} />
@@ -990,79 +1001,125 @@ Hãy phân tích:
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              {/* Info Box */}
-              <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                <p className="text-amber-200 text-sm">
-                  Tính năng "<strong>Phân tích tên đề tài</strong>" và "<strong>Thẩm định toàn bộ</strong>" yêu cầu đăng ký.
-                  Quản trị viên sẽ kích hoạt sau khi xác nhận.
-                </p>
-              </div>
-
+            <div className="p-5">
               {/* Success Message */}
-              {registerSuccess && (
-                <div className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3">
-                  <Check size={20} className="text-green-400" />
-                  <div>
-                    <p className="text-green-400 font-medium">Đã gửi yêu cầu thành công!</p>
-                    <p className="text-green-300/70 text-sm">Vui lòng chờ quản trị viên duyệt.</p>
+              {registerSuccess ? (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check size={32} className="text-green-400" />
                   </div>
+                  <h4 className="text-xl font-bold text-green-400 mb-2">Đăng ký thành công!</h4>
+                  <p className="text-gray-400 mb-4">Yêu cầu của bạn đã được gửi đến quản trị viên.</p>
+                  <p className="text-amber-400 text-sm">Vui lòng chờ duyệt trong vòng 24h.</p>
+                  <button
+                    onClick={() => { setShowRegisterModal(false); setRegisterSuccess(false); }}
+                    className="mt-6 px-8 py-3 bg-amber-500 hover:bg-amber-600 rounded-xl text-black font-bold transition-colors"
+                  >
+                    Đóng
+                  </button>
                 </div>
-              )}
-
-              {/* Error Message */}
-              {registerError && (
-                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                  {registerError}
-                </div>
-              )}
-
-              {/* Phone Input */}
-              {!registerSuccess && (
+              ) : (
                 <>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Số điện thoại <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
-                      placeholder="0xxx xxx xxx"
-                      className="w-full px-4 py-3 bg-[#0d0d1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none text-lg font-mono"
-                    />
-                    <p className="mt-2 text-gray-500 text-xs">
-                      Nhập số điện thoại Việt Nam (10-11 số, bắt đầu bằng 0)
-                    </p>
+                  {/* Bank Info Section */}
+                  <div className="mb-5 p-4 bg-gradient-to-r from-red-900/30 to-red-800/20 border border-red-500/30 rounded-xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">₫</div>
+                      <span className="text-red-400 font-bold">THÔNG TIN CHUYỂN KHOẢN</span>
+                    </div>
+
+                    {/* QR Code */}
+                    <div className="flex justify-center mb-4">
+                      <div className="bg-white p-2 rounded-lg">
+                        <img
+                          src={BANK_INFO.qrUrl}
+                          alt="QR Chuyển khoản Agribank"
+                          className="w-40 h-40 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bank Details */}
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Ngân hàng:</span>
+                        <span className="text-white font-medium">{BANK_INFO.bankName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Số tài khoản:</span>
+                        <span className="text-amber-400 font-mono font-bold">{BANK_INFO.accountNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Chủ tài khoản:</span>
+                        <span className="text-white font-medium">{BANK_INFO.accountHolder}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-red-500/20">
+                        <span className="text-gray-400">Số tiền:</span>
+                        <span className="text-green-400 font-bold text-lg">{BANK_INFO.amount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Nội dung CK:</span>
+                        <span className="text-amber-400 font-mono">SKKN {phoneInput || '[SĐT của bạn]'}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => { setShowRegisterModal(false); setRegisterError(''); }}
-                      className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl text-white font-medium transition-colors"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      onClick={handleRegisterPhone}
-                      disabled={!phoneInput.trim()}
-                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-xl text-black font-bold transition-colors"
-                    >
-                      Gửi yêu cầu kích hoạt
-                    </button>
+                  {/* Error Message */}
+                  {registerError && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                      <AlertTriangle size={16} />
+                      {registerError}
+                    </div>
+                  )}
+
+                  {/* Form Inputs */}
+                  <div className="space-y-4 mb-5">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Họ và tên <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={fullNameInput}
+                        onChange={(e) => setFullNameInput(e.target.value)}
+                        placeholder="Nhập họ và tên đầy đủ"
+                        className="w-full px-4 py-3 bg-[#0d0d1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Số điện thoại <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={phoneInput}
+                        onChange={(e) => setPhoneInput(e.target.value)}
+                        placeholder="0xxx xxx xxx"
+                        className="w-full px-4 py-3 bg-[#0d0d1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none font-mono"
+                      />
+                      <p className="mt-1 text-gray-500 text-xs">
+                        Nhập đúng SĐT đã dùng trong nội dung chuyển khoản
+                      </p>
+                    </div>
                   </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={handleRegisterUser}
+                    disabled={!phoneInput.trim() || !fullNameInput.trim()}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-xl text-black font-bold transition-all flex items-center justify-center gap-2 text-lg"
+                  >
+                    <Check size={20} />
+                    Tôi đã chuyển khoản
+                  </button>
+
+                  {/* Note */}
+                  <p className="mt-4 text-center text-gray-500 text-xs">
+                    Quản trị viên sẽ xác nhận và kích hoạt tài khoản trong vòng 24h làm việc.
+                  </p>
                 </>
-              )}
-
-              {/* Close button after success */}
-              {registerSuccess && (
-                <button
-                  onClick={() => { setShowRegisterModal(false); setRegisterSuccess(false); }}
-                  className="w-full py-3 bg-amber-500 hover:bg-amber-600 rounded-xl text-black font-bold transition-colors"
-                >
-                  Đóng
-                </button>
               )}
             </div>
           </div>
