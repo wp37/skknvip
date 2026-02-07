@@ -6,11 +6,11 @@ export const SYSTEM_API_KEY = '';
 
 // Available AI Models
 export const SKKN_MODELS = [
-   { id: 'gemini-2.5-flash-preview-09-2025', name: '⚡ Gemini 2.5 Flash (Khuyên dùng)' },
-   { id: 'gemini-2.0-flash-exp', name: '🚀 Gemini 2.0 Flash Exp' },
-   { id: 'gemini-1.5-pro', name: '💎 Gemini 1.5 Pro (Chất lượng cao)' },
+   { id: 'gemini-2.0-flash', name: '⚡ Gemini 2.0 Flash (Khuyên dùng)' },
    { id: 'gemini-1.5-flash', name: '⚡ Gemini 1.5 Flash (Nhanh)' },
    { id: 'gemini-1.5-flash-latest', name: '⚡ Gemini 1.5 Flash Latest' },
+   { id: 'gemini-1.5-pro-latest', name: '💎 Gemini 1.5 Pro (Chất lượng cao)' },
+   { id: 'gemini-pro', name: '💎 Gemini Pro' },
    { id: 'custom', name: '🔧 Nhập Model Tùy Chỉnh...' },
 ];
 
