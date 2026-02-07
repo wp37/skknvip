@@ -730,6 +730,17 @@ Hãy phân tích:
             {!registerSuccess && (
               <>
                 <div className="mb-4">
+                  <label className="block text-sm text-amber-400 mb-2">Họ và Tên <span className="text-red-400">*</span></label>
+                  <input
+                    type="text"
+                    value={fullNameInput}
+                    onChange={(e) => setFullNameInput(e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="w-full px-4 py-3 bg-[#0d0d1a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="mb-4">
                   <label className="block text-sm text-amber-400 mb-2">Số điện thoại <span className="text-red-400">*</span></label>
                   <input
                     type="tel"
@@ -763,7 +774,7 @@ Hãy phân tích:
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={handleRegisterUser}
-                    disabled={!phoneInput.trim()}
+                    disabled={!phoneInput.trim() || !fullNameInput.trim()}
                     className="w-full py-3 bg-green-500 hover:bg-green-600 rounded-xl text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Check size={18} />
