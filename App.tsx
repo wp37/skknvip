@@ -217,16 +217,49 @@ const App: React.FC = () => {
         const base64 = await readFileAsBase64(file);
         return { name: file.name, type: 'pdf', content: base64, mimeType: 'application/pdf' };
       } else if (fileName.endsWith('.docx')) {
-        // .docx files (Word 2007+) - supported by mammoth
+        // .docx files (Word 2007+) - try mammoth first, fallback to text for HTML exports
         const arrayBuffer = await readFileAsArrayBuffer(file);
-        let extractRawTextFn = mammoth.extractRawText;
-        // @ts-ignore
-        if (!extractRawTextFn && mammoth.default?.extractRawText) {
-          // @ts-ignore
-          extractRawTextFn = mammoth.default.extractRawText;
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Check for ZIP signature (PK = 0x50 0x4B) which indicates true DOCX format
+        const isZipFormat = uint8Array[0] === 0x50 && uint8Array[1] === 0x4B;
+
+        if (isZipFormat) {
+          // True DOCX file (ZIP-based Office Open XML)
+          try {
+            let extractRawTextFn = mammoth.extractRawText;
+            // @ts-ignore
+            if (!extractRawTextFn && mammoth.default?.extractRawText) {
+              // @ts-ignore
+              extractRawTextFn = mammoth.default.extractRawText;
+            }
+            const res = await extractRawTextFn({ arrayBuffer });
+            return { name: file.name, type: 'docx', content: res.value, mimeType: 'text/plain' };
+          } catch (mammothErr) {
+            console.log('Mammoth failed, trying text fallback:', mammothErr);
+          }
         }
-        const res = await extractRawTextFn({ arrayBuffer });
-        return { name: file.name, type: 'docx', content: res.value, mimeType: 'text/plain' };
+
+        // Fallback: Read as text (for HTML files saved as .docx by our system)
+        const textContent = await readFileAsText(file);
+        if (textContent && textContent.trim().length > 0) {
+          // Strip HTML tags if present to get plain text
+          const plainText = textContent
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Remove style blocks
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove script blocks
+            .replace(/<[^>]+>/g, '\n') // Replace HTML tags with newlines
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/\n\s*\n/g, '\n\n') // Clean up multiple newlines
+            .trim();
+          return { name: file.name, type: 'docx', content: plainText, mimeType: 'text/plain' };
+        }
+
+        alert('⚠️ Không thể đọc nội dung file .docx này.');
+        return null;
       } else if (fileName.endsWith('.doc')) {
         // .doc files - Try to read with mammoth first (some .doc files are actually docx format)
         // Also check file signature/magic bytes
