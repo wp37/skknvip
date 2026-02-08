@@ -129,11 +129,14 @@ const ResultView: React.FC<ResultViewProps> = ({ content }) => {
       </html>
     `;
 
-    const blob = new Blob(['\ufeff', fileContent], { type: 'application/msword' });
+    // Use proper docx MIME type for Office Open XML format
+    const blob = new Blob(['\ufeff', fileContent], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
     const url = URL.createObjectURL(blob);
     const downloadLink = document.createElement("a");
     downloadLink.href = url;
-    downloadLink.download = `SKKN_Result_${new Date().toISOString().slice(0, 10)}.doc`;
+    downloadLink.download = `SKKN_Result_${new Date().toISOString().slice(0, 10)}.docx`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -173,7 +176,7 @@ const ResultView: React.FC<ResultViewProps> = ({ content }) => {
               className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-95"
             >
               <Download className="w-4 h-4" />
-              Tải file Word (.doc)
+              Tải file Word (.docx)
             </button>
           </div>
         </div>

@@ -228,7 +228,33 @@ const App: React.FC = () => {
         const res = await extractRawTextFn({ arrayBuffer });
         return { name: file.name, type: 'docx', content: res.value, mimeType: 'text/plain' };
       } else if (fileName.endsWith('.doc')) {
-        // .doc files (Word 97-2003) - NOT supported by mammoth
+        // .doc files - Try to read with mammoth first (some .doc files are actually docx format)
+        // Also check file signature/magic bytes
+        const arrayBuffer = await readFileAsArrayBuffer(file);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Check for ZIP signature (PK) which indicates docx format
+        const isZipFormat = uint8Array[0] === 0x50 && uint8Array[1] === 0x4B;
+
+        if (isZipFormat) {
+          // This .doc file is actually a docx file (ZIP-based Office Open XML)
+          try {
+            let extractRawTextFn = mammoth.extractRawText;
+            // @ts-ignore
+            if (!extractRawTextFn && mammoth.default?.extractRawText) {
+              // @ts-ignore
+              extractRawTextFn = mammoth.default.extractRawText;
+            }
+            const res = await extractRawTextFn({ arrayBuffer });
+            if (res.value && res.value.trim().length > 0) {
+              return { name: file.name, type: 'docx', content: res.value, mimeType: 'text/plain' };
+            }
+          } catch (innerErr) {
+            console.log('Mammoth failed to read .doc file:', innerErr);
+          }
+        }
+
+        // True .doc format (Word 97-2003 binary format) - NOT supported
         alert('⚠️ File .doc (Word 97-2003) không được hỗ trợ!\n\nVui lòng mở file bằng Microsoft Word hoặc Google Docs, sau đó lưu lại dưới định dạng:\n• .docx (Word 2007+)\n• .pdf\n\nRồi tải lên lại.');
         return null;
       } else if (fileName.endsWith('.txt')) {
