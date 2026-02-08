@@ -216,7 +216,8 @@ const App: React.FC = () => {
       if (fileName.endsWith('.pdf')) {
         const base64 = await readFileAsBase64(file);
         return { name: file.name, type: 'pdf', content: base64, mimeType: 'application/pdf' };
-      } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+      } else if (fileName.endsWith('.docx')) {
+        // .docx files (Word 2007+) - supported by mammoth
         const arrayBuffer = await readFileAsArrayBuffer(file);
         let extractRawTextFn = mammoth.extractRawText;
         // @ts-ignore
@@ -226,12 +227,20 @@ const App: React.FC = () => {
         }
         const res = await extractRawTextFn({ arrayBuffer });
         return { name: file.name, type: 'docx', content: res.value, mimeType: 'text/plain' };
+      } else if (fileName.endsWith('.doc')) {
+        // .doc files (Word 97-2003) - NOT supported by mammoth
+        alert('⚠️ File .doc (Word 97-2003) không được hỗ trợ!\n\nVui lòng mở file bằng Microsoft Word hoặc Google Docs, sau đó lưu lại dưới định dạng:\n• .docx (Word 2007+)\n• .pdf\n\nRồi tải lên lại.');
+        return null;
       } else if (fileName.endsWith('.txt')) {
         const text = await readFileAsText(file);
         return { name: file.name, type: 'txt', content: text, mimeType: 'text/plain' };
       }
     } catch (e: any) {
-      alert(`Lỗi đọc file: ${e.message}`);
+      if (e.message?.includes('central directory') || e.message?.includes('zip')) {
+        alert('⚠️ Lỗi đọc file Word!\n\nFile này có thể là định dạng .doc cũ (Word 97-2003).\n\nVui lòng:\n1. Mở file bằng Microsoft Word\n2. Chọn File → Save As\n3. Lưu dưới định dạng .docx hoặc .pdf\n4. Tải lên lại');
+      } else {
+        alert(`Lỗi đọc file: ${e.message}`);
+      }
     }
     return null;
   };
