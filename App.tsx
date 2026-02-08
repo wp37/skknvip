@@ -1238,7 +1238,6 @@ Hãy phân tích:
       {/* Footer */}
       <footer className="py-8 border-t border-gray-800 text-center">
         <p className="text-amber-400 font-bold">Võ Ngọc Tùng</p>
-        <p className="text-gray-500 text-sm mt-1">THCS Nguyễn Văn Bảnh - Xã Nhuận Phú Tân, tỉnh Vĩnh Long</p>
         <div className="flex justify-center gap-4 mt-3 text-sm text-gray-500">
           <a href="tel:0814666040" className="hover:text-amber-400 flex items-center gap-1">
             <Phone size={14} />

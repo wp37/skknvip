@@ -9,18 +9,18 @@ interface SKKNWriterInput {
   authorTitle: string;
   schoolName: string;
   schoolAddress: string;
-  
+
   // Research Context
   skknTitle: string;
   subject: string;
   gradeLevel: string;
   awardGoal: string;
-  
+
   // Problem & Solution
   currentProblem: string;
   proposedSolution: string;
   expectedOutcome: string;
-  
+
   // Methodology
   sampleSize: string;
   duration: string;
@@ -37,25 +37,25 @@ interface Props {
   onGenerate: (input: SKKNWriterInput) => Promise<string>;
 }
 
-const SKKNWriterModal: React.FC<Props> = ({ 
-  isOpen, 
-  onClose, 
+const SKKNWriterModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
   initialTitle,
   initialSubject,
   initialGradeLevel,
   initialAwardGoal,
-  onGenerate 
+  onGenerate
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'input' | 'result'>('input');
-  
+
   const [input, setInput] = useState<SKKNWriterInput>({
-    authorName: 'Võ Ngọc Tùng',
+    authorName: '',
     authorTitle: 'Giáo viên',
-    schoolName: 'THCS Nguyễn Văn Bánh',
-    schoolAddress: 'Xã Nhuận Phú Tân, Tỉnh Vĩnh Long',
+    schoolName: '',
+    schoolAddress: '',
     skknTitle: initialTitle,
     subject: initialSubject || '',
     gradeLevel: initialGradeLevel || 'Tiểu học',
@@ -181,7 +181,7 @@ const SKKNWriterModal: React.FC<Props> = ({
     // Process content lines
     for (const line of lines) {
       const trimmedLine = line.trim();
-      
+
       // Skip decorative lines
       if (trimmedLine.startsWith('═') || trimmedLine.startsWith('─') || trimmedLine.startsWith('┌') || trimmedLine.startsWith('│') || trimmedLine.startsWith('├') || trimmedLine.startsWith('└')) {
         continue;
@@ -283,7 +283,7 @@ const SKKNWriterModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
       <div className="bg-neutral-900 w-full max-w-5xl rounded-3xl shadow-2xl shadow-amber-500/10 flex flex-col max-h-[95vh] overflow-hidden border border-amber-500/20">
-        
+
         {/* HEADER */}
         <div className="bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 p-5 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -304,11 +304,10 @@ const SKKNWriterModal: React.FC<Props> = ({
         <div className="flex border-b border-amber-500/20 bg-neutral-800">
           <button
             onClick={() => setActiveTab('input')}
-            className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${
-              activeTab === 'input' 
-                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900' 
+            className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${activeTab === 'input'
+                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
                 : 'text-neutral-400 hover:text-neutral-200'
-            }`}
+              }`}
           >
             <FileText className="inline h-4 w-4 mr-2" />
             Nhập thông tin
@@ -316,11 +315,10 @@ const SKKNWriterModal: React.FC<Props> = ({
           <button
             onClick={() => setActiveTab('result')}
             disabled={!generatedContent}
-            className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${
-              activeTab === 'result' 
-                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900' 
+            className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${activeTab === 'result'
+                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
                 : 'text-neutral-400 hover:text-neutral-200 disabled:opacity-50'
-            }`}
+              }`}
           >
             <BookOpen className="inline h-4 w-4 mr-2" />
             Kết quả SKKN
@@ -331,7 +329,7 @@ const SKKNWriterModal: React.FC<Props> = ({
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'input' ? (
             <div className="p-6 space-y-6">
-              
+
               {/* Section 1: Thông tin tác giả */}
               <div className="bg-neutral-800/50 p-5 rounded-2xl border border-neutral-700">
                 <h3 className="flex items-center gap-2 font-bold text-amber-300 mb-4">
