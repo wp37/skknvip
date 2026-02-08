@@ -67,7 +67,7 @@ const STORAGE_KEYS = {
 // Admin credentials (hardcoded for simplicity)
 const ADMIN_CREDENTIALS = {
   username: 'admin',
-  password: '123',
+  password: 'skkn123',
 };
 
 /**
