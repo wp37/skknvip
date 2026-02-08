@@ -67,7 +67,7 @@ const EvaluatorForm: React.FC<EvaluatorFormProps> = ({
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
-              accept=".pdf,.docx,.txt"
+              accept=".pdf,.docx,.doc,.txt,*/*"
             />
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">
@@ -76,7 +76,7 @@ const EvaluatorForm: React.FC<EvaluatorFormProps> = ({
               <p className="text-sm font-bold text-gray-400 group-hover/upload:text-emerald-400 transition-colors">
                 Chọn file từ máy tính
               </p>
-              <p className="text-xs text-gray-500 mt-2">Hỗ trợ .DOCX, .PDF (Tối đa 10MB)</p>
+              <p className="text-xs text-gray-500 mt-2">Hỗ trợ .DOCX, .PDF, .TXT (Tối đa 10MB)</p>
             </div>
           </div>
 
