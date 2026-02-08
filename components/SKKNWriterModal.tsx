@@ -273,9 +273,12 @@ const SKKNWriterModal: React.FC<Props> = ({
       ],
     });
 
-    // Generate and save
+    // Generate and save with correct MIME type
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `SKKN_${input.skknTitle.slice(0, 30).replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')}.docx`);
+    const docxBlob = new Blob([blob], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+    saveAs(docxBlob, `SKKN_${input.skknTitle.slice(0, 30).replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')}.docx`);
   };
 
   if (!isOpen) return null;
@@ -305,8 +308,8 @@ const SKKNWriterModal: React.FC<Props> = ({
           <button
             onClick={() => setActiveTab('input')}
             className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${activeTab === 'input'
-                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
-                : 'text-neutral-400 hover:text-neutral-200'
+              ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
+              : 'text-neutral-400 hover:text-neutral-200'
               }`}
           >
             <FileText className="inline h-4 w-4 mr-2" />
@@ -316,8 +319,8 @@ const SKKNWriterModal: React.FC<Props> = ({
             onClick={() => setActiveTab('result')}
             disabled={!generatedContent}
             className={`flex-1 py-3 px-4 font-medium text-sm transition-colors ${activeTab === 'result'
-                ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
-                : 'text-neutral-400 hover:text-neutral-200 disabled:opacity-50'
+              ? 'text-amber-400 border-b-2 border-amber-400 bg-neutral-900'
+              : 'text-neutral-400 hover:text-neutral-200 disabled:opacity-50'
               }`}
           >
             <BookOpen className="inline h-4 w-4 mr-2" />
