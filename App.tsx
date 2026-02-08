@@ -216,7 +216,7 @@ const App: React.FC = () => {
       if (fileName.endsWith('.pdf')) {
         const base64 = await readFileAsBase64(file);
         return { name: file.name, type: 'pdf', content: base64, mimeType: 'application/pdf' };
-      } else if (fileName.endsWith('.docx')) {
+      } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
         const arrayBuffer = await readFileAsArrayBuffer(file);
         let extractRawTextFn = mammoth.extractRawText;
         // @ts-ignore
