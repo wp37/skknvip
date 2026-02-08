@@ -46,12 +46,24 @@ export interface AlternativeTitle {
 
 export interface TitleAnalysisResult {
   score: number;
-  clarity_score: number; // Tương ứng thanh progress 15/20 trong ảnh
+  // Chi tiết 4 tiêu chí (tổng 100 điểm)
+  criteria: {
+    specificity: { score: number; max: 25; comment: string }; // Độ cụ thể
+    novelty: { score: number; max: 30; comment: string }; // Tính mới - độc đáo
+    feasibility: { score: number; max: 25; comment: string }; // Tính khả thi
+    clarity: { score: number; max: 20; comment: string }; // Độ rõ ràng - súc tích
+  };
   structure: TitleStructure;
-  issues: string[]; // Mảng các dòng lỗi màu đỏ
-  alternatives: AlternativeTitle[];
+  issues: string[]; // Mảng các lỗi phát hiện
+  alternatives: AlternativeTitle[]; // 5 gợi ý tên đề tài
   related_topics: string[];
-  conclusion: string; // Kết luận màu tím ở dưới cùng
+  layerAnalysis: {
+    layer1_database: { duplicateLevel: 'low' | 'medium' | 'high'; similarTitles: string[] };
+    layer2_online: { estimatedResults: number; popularityLevel: string };
+    layer3_expert: { expertVerdict: string; recommendations: string[] };
+  };
+  conclusion: string;
+  grade: 'excellent' | 'good' | 'average' | 'poor'; // Xanh / Vàng / Đỏ
 }
 
 export interface AnalysisResult {
@@ -134,4 +146,4 @@ export interface UploadedFile {
   mimeType: string;
 }
 
-export type AppMode = 'generator' | 'evaluator';
+export type AppMode = 'generator' | 'evaluator' | 'analyzer';

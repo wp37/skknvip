@@ -36,6 +36,10 @@ import * as mammoth from 'mammoth';
 import GeneratorForm from './components/GeneratorForm';
 import EvaluatorForm from './components/EvaluatorForm';
 import ResultView from './components/ResultView';
+import TitleAnalyzerForm from './components/TitleAnalyzerForm';
+import TitleAnalysisResult from './components/TitleAnalysisResult';
+import { TITLE_ANALYSIS_PROMPT } from './constants';
+import { TitleAnalysisResult as TitleAnalysisResultType } from './types';
 
 const GRADE_LEVELS = ['Tiểu học', 'THCS', 'THPT', 'Mầm non', 'Đại học/Cao đẳng'];
 const AWARD_GOALS = ['Cấp Trường', 'Cấp Huyện / Quận', 'Cấp Tỉnh / Thành phố', 'Cấp Quốc gia'];
@@ -64,6 +68,11 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
   const [pastedContent, setPastedContent] = useState('');
+
+  // === TITLE ANALYZER STATES ===
+  const [isTitleAnalyzing, setIsTitleAnalyzing] = useState(false);
+  const [titleAnalysisResult, setTitleAnalysisResult] = useState<TitleAnalysisResultType | null>(null);
+  const [showTitleAnalysisModal, setShowTitleAnalysisModal] = useState(false);
 
   // === GENERATOR STATES ===
   const [formData, setFormData] = useState<FormData>({
@@ -540,6 +549,49 @@ Hãy phân tích:
     setError(null);
     setStep(GenerationStep.IDLE);
     setProgressMsg('');
+    setTitleAnalysisResult(null);
+    setShowTitleAnalysisModal(false);
+  };
+
+  // Handle title analysis
+  const handleTitleAnalysis = async (titleInput: string, subjectInput: string, gradeLevelInput: string, awardGoalInput: string) => {
+    setIsTitleAnalyzing(true);
+    setError(null);
+
+    try {
+      const modelId = getSelectedModelId(settings);
+      const apiKey = settings.apiKey || SYSTEM_API_KEY;
+      const prompt = TITLE_ANALYSIS_PROMPT(titleInput, subjectInput, gradeLevelInput, awardGoalInput);
+
+      const response = await generateContent(
+        modelId,
+        [{ text: prompt }],
+        apiKey,
+        'Bạn là chuyên gia phân tích tên đề tài SKKN với 20 năm kinh nghiệm. Trả về kết quả dưới dạng JSON thuần túy, không markdown.'
+      );
+
+      // Parse JSON response
+      let jsonStr = response.trim();
+      // Remove markdown code blocks if present
+      jsonStr = jsonStr.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      const analysisResult: TitleAnalysisResultType = JSON.parse(jsonStr);
+      setTitleAnalysisResult(analysisResult);
+      setShowTitleAnalysisModal(true);
+    } catch (err: any) {
+      console.error('Title analysis error:', err);
+      setError('Lỗi phân tích: ' + err.message);
+      alert('⚠️ Có lỗi khi phân tích: ' + err.message);
+    } finally {
+      setIsTitleAnalyzing(false);
+    }
+  };
+
+  // Handle use suggested title
+  const handleUseSuggestedTitle = (suggestedTitle: string) => {
+    setFormData(prev => ({ ...prev, title: suggestedTitle }));
+    setShowTitleAnalysisModal(false);
+    handleModeChange('generator');
   };
 
   const isProcessing = step !== GenerationStep.IDLE && step !== GenerationStep.COMPLETED && step !== GenerationStep.ERROR;
@@ -644,15 +696,21 @@ Hãy phân tích:
         <div className="p-1 bg-[#1a1a2e] rounded-xl flex shadow-inner border border-gray-800">
           <button
             onClick={() => handleModeChange('generator')}
-            className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${appMode === 'generator' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+            className={`flex-1 py-2.5 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${appMode === 'generator' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
           >
-            <PenTool size={16} /> Soạn thảo SKKN
+            <PenTool size={14} /> <span className="hidden sm:inline">Soạn thảo</span><span className="sm:hidden">Viết</span>
+          </button>
+          <button
+            onClick={() => handleModeChange('analyzer')}
+            className={`flex-1 py-2.5 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${appMode === 'analyzer' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+          >
+            <Target size={14} /> <span className="hidden sm:inline">Phân tích Đề tài</span><span className="sm:hidden">Đề tài</span>
           </button>
           <button
             onClick={() => handleModeChange('evaluator')}
-            className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${appMode === 'evaluator' ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+            className={`flex-1 py-2.5 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${appMode === 'evaluator' ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
           >
-            <ShieldCheck size={16} /> Chấm điểm AI
+            <ShieldCheck size={14} /> <span className="hidden sm:inline">Chấm điểm</span><span className="sm:hidden">Chấm</span>
           </button>
         </div>
       </div>
@@ -1240,7 +1298,7 @@ Hãy phân tích:
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-400 text-sm">
             <Sparkles size={16} className="animate-pulse" />
-            {appMode === 'generator' ? 'AI viết SKKN tự động theo chuẩn Bộ GD&ĐT' : 'AI chấm điểm và phát hiện đạo văn'}
+            {appMode === 'generator' ? 'AI viết SKKN tự động theo chuẩn Bộ GD&ĐT' : appMode === 'analyzer' ? 'AI phân tích & chấm điểm tên đề tài SKKN' : 'AI chấm điểm và phát hiện đạo văn'}
           </div>
         </div>
 
@@ -1270,6 +1328,28 @@ Hãy phân tích:
               isEvaluating={step === GenerationStep.EVALUATING || step === GenerationStep.CHECKING_PLAGIARISM}
             />
           </div>
+        )}
+
+        {appMode === 'analyzer' && (
+          <div className="transition-all duration-500">
+            <TitleAnalyzerForm
+              onAnalyze={handleTitleAnalysis}
+              isAnalyzing={isTitleAnalyzing}
+              onUseTitle={(title) => {
+                setFormData(prev => ({ ...prev, title }));
+                handleModeChange('generator');
+              }}
+            />
+          </div>
+        )}
+
+        {/* Title Analysis Result Modal */}
+        {showTitleAnalysisModal && titleAnalysisResult && (
+          <TitleAnalysisResult
+            result={titleAnalysisResult}
+            onClose={() => setShowTitleAnalysisModal(false)}
+            onUseTitle={handleUseSuggestedTitle}
+          />
         )}
 
         {/* Progress Indicator */}

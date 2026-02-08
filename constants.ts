@@ -465,3 +465,81 @@ Hãy kiểm tra CHUYÊN SÂU nội dung SKKN này về tính độc đáo và ph
    - SKKN có đủ tiêu chuẩn về tính độc đáo không?
    - Cần sửa đổi những gì trước khi nộp?
 `;
+
+// Title Analysis Prompt - Phân tích tên đề tài SKKN theo quy trình 3 lớp
+export const TITLE_ANALYSIS_PROMPT = (title: string, subject: string, gradeLevel: string, awardGoal: string): string => `
+Bạn là CHUYÊN GIA PHÂN TÍCH TÊN ĐỀ TÀI SKKN với 20 năm kinh nghiệm thẩm định SKKN cấp Tỉnh và Quốc gia.
+
+🎯 NHIỆM VỤ: Phân tích và chấm điểm tên đề tài SKKN sau:
+
+📝 TÊN ĐỀ TÀI: "${title}"
+📚 MÔN HỌC: ${subject}
+🎓 CẤP HỌC: ${gradeLevel}
+🏆 MỤC TIÊU GIẢI: ${awardGoal}
+
+🔄 THỰC HIỆN QUY TRÌNH PHÂN TÍCH 3 LỚP:
+
+**LỚP 1 - DATABASE NỘI BỘ:** Kiểm tra các patterns phổ biến như "Kahoot", "Zoom", "AI", "STEM", "Gamification". Phát hiện cấu trúc trùng lặp. Đánh giá mức độ "sáo rỗng".
+
+**LỚP 2 - MÔ PHỎNG TÌM KIẾM ONLINE:** Ước tính số kết quả trên Google Scholar, Violet.vn. Đánh giá mức độ phổ biến và xu hướng "bão hòa".
+
+**LỚP 3 - ĐỐI CHIẾU NGUỒN CHUYÊN NGÀNH:** So sánh với tiêu chuẩn Bộ GD&ĐT. Kiểm tra cấu trúc: Hành động - Công cụ - Môn học - Phạm vi - Mục đích.
+
+📊 CHẤM ĐIỂM (THANG 100) THEO 4 TIÊU CHÍ:
+1. ĐỘ CỤ THỂ (25đ): Có đủ Môn học, Lớp/Khối, Công cụ/Phương pháp, Phạm vi áp dụng?
+2. TÍNH MỚI - ĐỘC ĐÁO (30đ): Góc nhìn mới? Khác biệt so với hàng nghìn SKKN tương tự?
+3. TÍNH KHẢ THI (25đ): Có thể thực hiện được tại đơn vị thông thường?
+4. ĐỘ RÕ RÀNG - SÚC TÍCH (20đ): Dễ hiểu, ngắn gọn nhưng đủ ý?
+
+📤 OUTPUT: Trả về JSON THUẦN TÚY (KHÔNG có markdown code block):
+{
+  "score": <số điểm tổng 0-100>,
+  "grade": "<excellent|good|average|poor>",
+  "criteria": {
+    "specificity": { "score": <0-25>, "max": 25, "comment": "<nhận xét ngắn gọn>" },
+    "novelty": { "score": <0-30>, "max": 30, "comment": "<nhận xét ngắn gọn>" },
+    "feasibility": { "score": <0-25>, "max": 25, "comment": "<nhận xét ngắn gọn>" },
+    "clarity": { "score": <0-20>, "max": 20, "comment": "<nhận xét ngắn gọn>" }
+  },
+  "structure": {
+    "action": "<động từ hành động hoặc 'thiếu'>",
+    "tool": "<công cụ/phương pháp hoặc 'thiếu'>",
+    "subject": "<môn học/lĩnh vực hoặc 'thiếu'>",
+    "scope": "<phạm vi lớp/khối hoặc 'thiếu'>",
+    "goal": "<mục tiêu hoặc 'thiếu'>"
+  },
+  "issues": ["<lỗi 1: mô tả cụ thể>", "<lỗi 2: mô tả cụ thể>"],
+  "alternatives": [
+    { "title": "<Gợi ý tên đề tài 1>", "reason": "<lý do tốt hơn>", "score": <điểm ước tính>, "tags": ["cụ thể", "độc đáo"] },
+    { "title": "<Gợi ý tên đề tài 2>", "reason": "<lý do tốt hơn>", "score": <điểm ước tính>, "tags": ["khả thi", "rõ ràng"] },
+    { "title": "<Gợi ý tên đề tài 3>", "reason": "<lý do tốt hơn>", "score": <điểm ước tính>, "tags": [] },
+    { "title": "<Gợi ý tên đề tài 4>", "reason": "<lý do tốt hơn>", "score": <điểm ước tính>, "tags": [] },
+    { "title": "<Gợi ý tên đề tài 5>", "reason": "<lý do tốt hơn>", "score": <điểm ước tính>, "tags": [] }
+  ],
+  "related_topics": ["<chủ đề liên quan 1>", "<chủ đề liên quan 2>"],
+  "layerAnalysis": {
+    "layer1_database": { "duplicateLevel": "<low|medium|high>", "similarTitles": ["<tên đề tài tương tự 1>", "<tên đề tài tương tự 2>"] },
+    "layer2_online": { "estimatedResults": <số ước tính>, "popularityLevel": "<Rất phổ biến|Khá phổ biến|Trung bình|Ít phổ biến|Mới lạ>" },
+    "layer3_expert": { "expertVerdict": "<nhận định của chuyên gia>", "recommendations": ["<khuyến nghị 1>", "<khuyến nghị 2>"] }
+  },
+  "conclusion": "<kết luận tổng quan 2-3 câu>"
+}
+`;
+
+// Grade Level Options
+export const GRADE_LEVELS = [
+   'Tiểu học',
+   'THCS (Lớp 6-9)',
+   'THPT (Lớp 10-12)',
+   'Mầm non',
+   'Đại học/Cao đẳng',
+   'Giáo dục thường xuyên',
+];
+
+// Award Goal Options
+export const AWARD_GOALS = [
+   'Cấp Trường',
+   'Cấp Huyện/Quận',
+   'Cấp Tỉnh/Thành phố',
+   'Cấp Quốc gia',
+];
