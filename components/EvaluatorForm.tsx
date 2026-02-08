@@ -67,7 +67,6 @@ const EvaluatorForm: React.FC<EvaluatorFormProps> = ({
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
-              accept=".pdf,.docx,.doc,.txt,*/*"
             />
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">

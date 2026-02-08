@@ -254,7 +254,6 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     className="hidden"
-                    accept=".pdf,.docx,.doc,.txt,*/*"
                     multiple
                   />
                   <div className="text-center p-4">
